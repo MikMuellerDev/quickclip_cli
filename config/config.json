@@ -1,0 +1,6 @@
+{
+    "quickclip_url": "http://localhost:8081",
+    "quicklip_username": "testuser",
+    "quicklip_password": "password",
+    "default_clipboard_id": "cli"
+}
