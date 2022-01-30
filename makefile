@@ -17,11 +17,11 @@ clean:
 	rm -rf bin build target
 
 build:
-	@$(CARGO) build --target-dir=bin --release
-	mv ./bin/release/quickclip_cli ./
+	@$(CARGO) build --release
 	rm -rf ./bin
 	mkdir -p ./bin
-	mv ./quickclip_cli ./bin
+	mv ./target/release/quickclip_cli ./bin
+	# mv ./quickclip_cli ./bin
 
 bench:
 	@$(CARGO) bench
@@ -29,9 +29,9 @@ bench:
 check:
 	@$(CARGO) check
 
-install:
-	build
-	sudo mv ./bin/release/quickclip_cli /usr/bin/quickclip
+install: build
+	chmod +x ./bin/quickclip_cli
+	sudo mv ./bin/quickclip_cli /usr/bin/quick-clip
 
 uninstall:
 	sudo rm /usr/bin/quickclip

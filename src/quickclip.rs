@@ -48,7 +48,7 @@ pub async fn put_content(
         });
 
     let status_code = res.status();
-    println!("Status Code: {}", status_code);
+    // println!("Status Code: {}", status_code);
     if status_code == 200 {
         println!(
             "Contents of clipboard '{}' updated {}.",
@@ -64,7 +64,7 @@ pub async fn put_content(
     }
 }
 
-pub async fn get_content(url: &String, id: &String, username: &String, password: &String) {
+pub async fn get_content(url: &String, id: &String, username: &String, password: &String, pretty: bool) {
     let client = reqwest::Client::new();
     let res = client
         .get(format!(
@@ -94,9 +94,11 @@ pub async fn get_content(url: &String, id: &String, username: &String, password:
                 eprintln!("Parsing Server response failed, check your configuration.");
                 process::exit(3)
             });
-        // println!("{:?}", clipboard);
-        // println!("Name: {}", clipboard.name);
-        display_clipboard(clipboard)
+        if pretty {
+            display_clipboard(clipboard)
+        } else {
+            println!("{}", clipboard.content)
+        }
     } else {
         println!(
             "Getting content {}. Response: {}",
@@ -119,7 +121,7 @@ pub fn display_clipboard(clipboard: Clipboard) {
 \u{2502} Read Only:    \u{2502} {}
 {}
 ",
-        get_times("\u{2500}".to_string(), 40),
+        get_times("\u{2500}".to_string(), 70),
         colors::blue(clipboard.name.as_str()),
         colors::blue(clipboard.id.as_str()),
         colors::blue(clipboard.description.as_str()),
@@ -127,22 +129,24 @@ pub fn display_clipboard(clipboard: Clipboard) {
         colors::blue(format!("{}", clipboard.refresh).as_str()),
         colors::blue(format!("{}", clipboard.refresh_interval).as_str()),
         colors::blue(format!("{}", clipboard.read_only).as_str()),
-        get_times("\u{2500}".to_string(), 40),
+        get_times("\u{2500}".to_string(), 70),
     );
     println!("{}", text);
     // println!("{}", clipboard.content.replace("\n", "\n      "));
 
+    let content = clipboard.content;
+
     let mut line_count: u16 = 0;
-    print!("\n{}\u{2502}      ", add_padding(line_count));
-    for char in clipboard.content.chars() {
+    print!("\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m    ", add_padding(line_count));
+    for char in content.chars() {
         if char == '\n' {
             line_count += 1;
-            print!("\n{}\u{2502}", add_padding(line_count));
+            print!("\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m    ", add_padding(line_count));
         } else {
             print!("{}", char);
         }
     }
-    println!()
+    println!("\n")
 }
 
 fn add_padding(i: u16) -> String {

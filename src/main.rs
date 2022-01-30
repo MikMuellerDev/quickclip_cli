@@ -6,7 +6,7 @@ mod colors;
 mod config;
 mod quickclip;
 
-const CONFIG_FILE_PATH: &str = "./config/config.json";
+const CONFIG_FILE_PATH: &str = "/home/mik/.config/quickclip.json";
 
 /// A CLI to interact with QuickClip from the terminal
 #[derive(StructOpt, Debug)]
@@ -19,6 +19,10 @@ struct QuickClip {
     /// If used, quickclip CLI will read the content from StdIn, which allows piping content into quickclip.
     #[structopt(short = "i", long = "input")]
     input: bool,
+
+    /// If used, quickclip CLI will output only the fetched contents, making it useful for piping it into other processes.
+    #[structopt(short = "o", long = "output")]
+    output: bool,
 
     /// Content to push onto the clipboard when using the set mode
     #[structopt(name = "CONTENT")]
@@ -48,10 +52,10 @@ async fn main() {
                 if input == "" {
                     break;
                 }
-                content = format!("{}{}     ", content, input);
+                content = format!("{}{}", content, input);
             }
         }
-        println!("Content: {}", content);
+        // println!("Content: {}", content);
         quickclip::put_content(
             &config.quickclip_url,
             &config.default_clipboard_id,
@@ -66,6 +70,7 @@ async fn main() {
             &config.default_clipboard_id,
             &config.quicklip_username,
             &config.quicklip_password,
+            !quickclip.output,
         )
         .await;
     } else {

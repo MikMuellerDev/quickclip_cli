@@ -15,7 +15,7 @@ pub struct Config {
 
 pub fn read_config(filepath: &str) -> Config {
     let config_string = fs::read_to_string(filepath).ok().unwrap_or_else(|| {
-        eprintln!("Reading Config file failed.");
+        eprintln!("Reading Config file from {} failed.", filepath);
         process::exit(2)
     });
     let config: Config = serde_json::from_str(config_string.as_str())
