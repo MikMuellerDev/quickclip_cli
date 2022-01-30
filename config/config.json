@@ -1,5 +1,5 @@
 {
-    "quickclip_url": "http://192.168.178.204:8081",
+    "quickclip_url": "http://localhost:8081",
     "quicklip_username": "testuser",
     "quicklip_password": "password",
     "default_clipboard_id": "cli"
