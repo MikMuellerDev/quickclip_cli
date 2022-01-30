@@ -86,7 +86,7 @@ pub async fn get_content(url: &String, id: &String, username: &String, password:
             process::exit(4);
         });
 
-        println!("{}", response_text);
+        // println!("{}", response_text);
 
         let clipboard: Clipboard = serde_json::from_str(response_text.as_str())
             .ok()
@@ -109,61 +109,56 @@ pub async fn get_content(url: &String, id: &String, username: &String, password:
 pub fn display_clipboard(clipboard: Clipboard) {
     let text = format!(
         "
-Name:         | {}
-ID:           | {} 
-Description:  | {}
-Restricted:   | {}
-Refresh:      | {}
-Refresh Int:  | {}
-Read Only:    | {}
+{}
+\u{2502} Name:         \u{2502} {}
+\u{2502} ID:           \u{2502} {} 
+\u{2502} Description:  \u{2502} {}
+\u{2502} Restricted:   \u{2502} {}
+\u{2502} Refresh:      \u{2502} {}
+\u{2502} Refresh Int:  \u{2502} {}
+\u{2502} Read Only:    \u{2502} {}
+{}
 ",
+        get_times("\u{2500}".to_string(), 40),
         colors::blue(clipboard.name.as_str()),
         colors::blue(clipboard.id.as_str()),
         colors::blue(clipboard.description.as_str()),
         colors::blue(format!("{}", clipboard.restricted).as_str()),
         colors::blue(format!("{}", clipboard.refresh).as_str()),
         colors::blue(format!("{}", clipboard.refresh_interval).as_str()),
-        colors::blue(format!("{}", clipboard.read_only).as_str())
+        colors::blue(format!("{}", clipboard.read_only).as_str()),
+        get_times("\u{2500}".to_string(), 40),
     );
     println!("{}", text);
     // println!("{}", clipboard.content.replace("\n", "\n      "));
 
     let mut line_count: u16 = 0;
+    print!("\n{}\u{2502}      ", add_padding(line_count));
     for char in clipboard.content.chars() {
-            if char == '\n' {
-                line_count += 1;
-                print!("\n{}|      ", add_padding(line_count));
-            } else {
-                print!("{}", char);
-            }
+        if char == '\n' {
+            line_count += 1;
+            print!("\n{}\u{2502}", add_padding(line_count));
+        } else {
+            print!("{}", char);
+        }
     }
     println!()
 }
 
-// pub name: String,
-// pub id: String,
-// pub content: String,
-// pub description: String,
-// pub restricted: bool,
-// pub refresh: bool,
-// pub refresh_interval: u32,
-// pub read_only: bool,
-
-// let config: Config = serde_json::from_str(config_string.as_str())
-//     .ok()
-//     .unwrap_or_else(|| {
-//         eprintln!("Parsing config file failed, check your JSON syntax.");
-//         process::exit(3)
-//     });
-// return config;
-
-
 fn add_padding(i: u16) -> String {
     if i < 10 {
-        return format!("   {}", i);
-    } else if i < 100 {
         return format!("  {}", i);
-    } else {
+    } else if i < 100 {
         return format!(" {}", i);
+    } else {
+        return format!("{}", i);
     }
+}
+
+fn get_times(string: String, count: u8) -> String {
+    let mut text: String = string.to_string();
+    for _ in 0..count {
+        text = format!("{}{}", text, string);
+    }
+    return text;
 }

@@ -1,3 +1,5 @@
+use std::io;
+
 use crate::config::Config;
 use structopt::StructOpt;
 mod colors;
@@ -10,37 +12,55 @@ const CONFIG_FILE_PATH: &str = "./config/config.json";
 #[derive(StructOpt, Debug)]
 #[structopt(author)]
 struct QuickClip {
-    /// Method of interacting with QuickClip
+    /// Method of interacting with QuickClip. Valid modes are ("set", "s") and ("get", "g")
     #[structopt(required = true)]
     mode: String,
 
-    /// Content to set when using the --set /-s flag
-    #[structopt(short = "i", long = "interactive")]
-    interactive: bool,
+    /// If used, quickclip CLI will read the content from StdIn, which allows piping content into quickclip.
+    #[structopt(short = "i", long = "input")]
+    input: bool,
 
-    /// Content to set when using the --set /-s flag
-    #[structopt(name = "CONTENT", required_if("mode", "set"))]
+    /// Content to push onto the clipboard when using the set mode
+    #[structopt(name = "CONTENT")]
     content: Option<String>,
 }
 
 #[tokio::main]
 async fn main() {
     let config: Config = config::read_config(CONFIG_FILE_PATH);
-    println!("{:?}", &config);
-    println!("Config file loaded {}.", colors::green("successfully"));
+    // println!("{:?}", &config);
+    // println!("Config file loaded {}.", colors::green("successfully"));
 
     let quickclip = QuickClip::from_args();
 
-    if quickclip.mode == "set" {
+    if quickclip.mode == "set" || quickclip.mode == "s" {
+        let mut content: String;
+        if !quickclip.input {
+            content = quickclip.content.unwrap().to_string();
+        } else {
+            content = "".to_string();
+            loop {
+                let mut input = String::new();
+                io::stdin()
+                    .read_line(&mut input)
+                    .expect("Failed to read from pipe");
+                input = input.to_string();
+                if input == "" {
+                    break;
+                }
+                content = format!("{}{}     ", content, input);
+            }
+        }
+        println!("Content: {}", content);
         quickclip::put_content(
             &config.quickclip_url,
             &config.default_clipboard_id,
             &config.quicklip_username,
             &config.quicklip_password,
-            quickclip.content.unwrap().to_string(),
+            content,
         )
         .await;
-    } else if quickclip.mode == "get" {
+    } else if quickclip.mode == "get" || quickclip.mode == "g" {
         quickclip::get_content(
             &config.quickclip_url,
             &config.default_clipboard_id,
@@ -55,7 +75,4 @@ async fn main() {
             colors::blue(quickclip.mode.as_str())
         )
     }
-
-    // Experimental
-    if quickclip.interactive {}
 }
