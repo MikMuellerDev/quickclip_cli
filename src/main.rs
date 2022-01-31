@@ -1,12 +1,11 @@
-use std::io;
-
 use crate::config::Config;
+use std::process;
 use structopt::StructOpt;
+mod quickclip;
+use std::env;
+use std::io;
 mod colors;
 mod config;
-mod quickclip;
-
-const CONFIG_FILE_PATH: &str = "/home/mik/.config/quickclip.json";
 
 /// A CLI to interact with QuickClip from the terminal
 #[derive(StructOpt, Debug)]
@@ -27,20 +26,34 @@ struct QuickClip {
     /// Content to push onto the clipboard when using the set mode
     #[structopt(name = "CONTENT")]
     content: Option<String>,
+
+    /// Content to push onto the clipboard when using the set mode
+    #[structopt(name = "CLIPBOARD ID", short = "c", long = "id")]
+    optional_clip_id: Option<String>,
 }
 
 #[tokio::main]
 async fn main() {
-    let config: Config = config::read_config(CONFIG_FILE_PATH);
-    // println!("{:?}", &config);
-    // println!("Config file loaded {}.", colors::green("successfully"));
+    let home_directory = env::var("HOME").unwrap_or_else(|e| {
+        eprintln!("{}: retrieving home directory: {}", colors::red("Error"), e);
+        process::exit(7)
+    });
+    let config_file_path: String = format!("{}/.config/quickclip.json", home_directory);
+    let config: Config = config::read_config(config_file_path.as_str());
 
     let quickclip = QuickClip::from_args();
+
+    let clipboard_id = quickclip
+        .optional_clip_id
+        .unwrap_or(config.default_clipboard_id);
 
     if quickclip.mode == "set" || quickclip.mode == "s" {
         let mut content: String;
         if !quickclip.input {
-            content = quickclip.content.unwrap().to_string();
+            content = quickclip.content.unwrap_or_else(|| {
+                eprintln!("{}: A content string is required when using set.", colors::red("Error"));
+                process::exit(1)
+            }).to_string();
         } else {
             content = "".to_string();
             loop {
@@ -58,7 +71,7 @@ async fn main() {
         // println!("Content: {}", content);
         quickclip::put_content(
             &config.quickclip_url,
-            &config.default_clipboard_id,
+            &clipboard_id,
             &config.quicklip_username,
             &config.quicklip_password,
             content,
@@ -67,7 +80,7 @@ async fn main() {
     } else if quickclip.mode == "get" || quickclip.mode == "g" {
         quickclip::get_content(
             &config.quickclip_url,
-            &config.default_clipboard_id,
+            &clipboard_id,
             &config.quicklip_username,
             &config.quicklip_password,
             !quickclip.output,

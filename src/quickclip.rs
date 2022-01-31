@@ -1,10 +1,9 @@
-use crate::colors;
 use crate::config::Clipboard;
-use std::process;
-
-extern crate serde;
 extern crate serde_json;
 use serde_json::json;
+extern crate serde;
+use crate::colors;
+use std::process;
 
 pub async fn put_content(
     url: &String,
@@ -77,12 +76,10 @@ pub async fn get_content(
             process::exit(4);
         });
 
-        // println!("{}", response_text);
-
         let clipboard: Clipboard = serde_json::from_str(response_text.as_str())
             .ok()
             .unwrap_or_else(|| {
-                eprintln!("Parsing Server response failed, check your configuration.");
+                eprintln!("{}: Parsing Server response failed, check your configuration.", colors::red("Error"));
                 process::exit(3)
             });
         if pretty {
@@ -92,7 +89,7 @@ pub async fn get_content(
         }
     } else {
         println!(
-            "Getting content {}. Response: {}",
+            "Getting clipboard {}. Response: {}",
             colors::red("failed"),
             status_code
         )
@@ -134,16 +131,16 @@ fn display_clipboard(clipboard: Clipboard) {
     );
     println!("{}", text);
     let content = clipboard.content;
-    let mut line_count: u16 = 0;
+    let mut line_count: u16 = 1;
     print!(
-        "\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m    ",
+        "\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m ",
         add_padding(line_count)
     );
     for char in content.chars() {
         if char == '\n' {
             line_count += 1;
             print!(
-                "\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m    ",
+                "\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m ",
                 add_padding(line_count)
             );
         } else {

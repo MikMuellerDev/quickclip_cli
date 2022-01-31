@@ -1,8 +1,8 @@
-use std::{fs, process};
-extern crate serde;
 extern crate serde_json;
 use serde::Deserialize;
+use std::{fs, process};
 use serde::Serialize;
+extern crate serde;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
