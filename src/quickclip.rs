@@ -1,25 +1,10 @@
 use crate::colors;
-// use reqwest::StatusCode;
-use serde_json::json;
+use crate::config::Clipboard;
 use std::process;
 
 extern crate serde;
 extern crate serde_json;
-use serde::Deserialize;
-// use serde::Serialize;
-
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "PascalCase")]
-pub struct Clipboard {
-    pub name: String,
-    pub id: String,
-    pub content: String,
-    pub description: String,
-    pub restricted: bool,
-    pub refresh: bool,
-    pub refresh_interval: u32,
-    pub read_only: bool,
-}
+use serde_json::json;
 
 pub async fn put_content(
     url: &String,
@@ -64,7 +49,13 @@ pub async fn put_content(
     }
 }
 
-pub async fn get_content(url: &String, id: &String, username: &String, password: &String, pretty: bool) {
+pub async fn get_content(
+    url: &String,
+    id: &String,
+    username: &String,
+    password: &String,
+    pretty: bool,
+) {
     let client = reqwest::Client::new();
     let res = client
         .get(format!(
@@ -108,40 +99,53 @@ pub async fn get_content(url: &String, id: &String, username: &String, password:
     }
 }
 
-pub fn display_clipboard(clipboard: Clipboard) {
+fn display_clipboard(clipboard: Clipboard) {
     let text = format!(
         "
 {}
-\u{2502} Name:         \u{2502} {}
-\u{2502} ID:           \u{2502} {} 
-\u{2502} Description:  \u{2502} {}
-\u{2502} Restricted:   \u{2502} {}
-\u{2502} Refresh:      \u{2502} {}
-\u{2502} Refresh Int:  \u{2502} {}
-\u{2502} Read Only:    \u{2502} {}
+\u{2502} Name:         \u{2502} {} {}
+\u{2502} ID:           \u{2502} {} {}
+\u{2502} Description:  \u{2502} {} {}
+\u{2502} Restricted:   \u{2502} {} {}
+\u{2502} Refresh:      \u{2502} {} {}
+\u{2502} Refresh Int:  \u{2502} {} {}
+\u{2502} Read Only:    \u{2502} {} {}
 {}
 ",
-        get_times("\u{2500}".to_string(), 70),
+        get_times("\u{2500}".to_string(), 60),
         colors::blue(clipboard.name.as_str()),
+        format!("{}\u{2502}", get_padding(clipboard.name.to_string())),
         colors::blue(clipboard.id.as_str()),
+        format!("{}\u{2502}", get_padding(clipboard.id.to_string())),
         colors::blue(clipboard.description.as_str()),
+        format!("{}\u{2502}", get_padding(clipboard.description.to_string())),
         colors::blue(format!("{}", clipboard.restricted).as_str()),
+        format!("{}\u{2502}", get_padding(clipboard.restricted.to_string())),
         colors::blue(format!("{}", clipboard.refresh).as_str()),
+        format!("{}\u{2502}", get_padding(clipboard.refresh.to_string())),
         colors::blue(format!("{}", clipboard.refresh_interval).as_str()),
+        format!(
+            "{}\u{2502}",
+            get_padding(clipboard.refresh_interval.to_string())
+        ),
         colors::blue(format!("{}", clipboard.read_only).as_str()),
-        get_times("\u{2500}".to_string(), 70),
+        format!("{}\u{2502}", get_padding(clipboard.read_only.to_string())),
+        get_times("\u{2500}".to_string(), 60),
     );
     println!("{}", text);
-    // println!("{}", clipboard.content.replace("\n", "\n      "));
-
     let content = clipboard.content;
-
     let mut line_count: u16 = 0;
-    print!("\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m    ", add_padding(line_count));
+    print!(
+        "\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m    ",
+        add_padding(line_count)
+    );
     for char in content.chars() {
         if char == '\n' {
             line_count += 1;
-            print!("\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m    ", add_padding(line_count));
+            print!(
+                "\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m    ",
+                add_padding(line_count)
+            );
         } else {
             print!("{}", char);
         }
@@ -165,4 +169,12 @@ fn get_times(string: String, count: u8) -> String {
         text = format!("{}{}", text, string);
     }
     return text;
+}
+
+fn get_padding(string: String) -> String {
+    let mut output = "".to_string();
+    for _ in 0..41 - string.len() {
+        output = format!(" {}", output);
+    }
+    return output;
 }

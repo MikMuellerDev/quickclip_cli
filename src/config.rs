@@ -5,12 +5,24 @@ use serde::Deserialize;
 use serde::Serialize;
 
 #[derive(Serialize, Deserialize, Debug)]
-
 pub struct Config {
     pub quickclip_url: String,
     pub quicklip_username: String,
     pub quicklip_password: String,
     pub default_clipboard_id: String,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct Clipboard {
+    pub name: String,
+    pub id: String,
+    pub content: String,
+    pub description: String,
+    pub restricted: bool,
+    pub refresh: bool,
+    pub refresh_interval: u32,
+    pub read_only: bool,
 }
 
 pub fn read_config(filepath: &str) -> Config {

@@ -1,4 +1,4 @@
-appname := quickclip-0.1.1
+appname := quickclip-0.2.0
 appdir := quickclip_cli
 
 COLOR ?= auto
