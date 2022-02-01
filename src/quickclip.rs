@@ -109,7 +109,7 @@ fn display_clipboard(clipboard: Clipboard) {
 \u{2502} Read Only:    \u{2502} {} {}
 {}
 ",
-        get_times("\u{2500}".to_string(), 60),
+        "\u{2500}".repeat(60),
         colors::blue(clipboard.name.as_str()),
         format!("{}\u{2502}", get_padding(clipboard.name.to_string())),
         colors::blue(clipboard.id.as_str()),
@@ -127,45 +127,27 @@ fn display_clipboard(clipboard: Clipboard) {
         ),
         colors::blue(format!("{}", clipboard.read_only).as_str()),
         format!("{}\u{2502}", get_padding(clipboard.read_only.to_string())),
-        get_times("\u{2500}".to_string(), 60),
+       "\u{2500}".repeat(60),
     );
     println!("{}", text);
     let content = clipboard.content;
     let mut line_count: u16 = 1;
     print!(
-        "\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m ",
-        add_padding(line_count)
+        "\n\x1b[2m\x1b[1;39m{: >3} \u{2502}\x1b[22m ",
+        line_count
     );
     for char in content.chars() {
         if char == '\n' {
             line_count += 1;
             print!(
-                "\n\x1b[2m\x1b[1;39m{} \u{2502}\x1b[22m ",
-                add_padding(line_count)
+                "\n\x1b[2m\x1b[1;39m{: >3} \u{2502}\x1b[22m ",
+                line_count
             );
         } else {
             print!("{}", char);
         }
     }
     println!("\n")
-}
-
-fn add_padding(i: u16) -> String {
-    if i < 10 {
-        return format!("  {}", i);
-    } else if i < 100 {
-        return format!(" {}", i);
-    } else {
-        return format!("{}", i);
-    }
-}
-
-fn get_times(string: String, count: u8) -> String {
-    let mut text: String = string.to_string();
-    for _ in 0..count {
-        text = format!("{}{}", text, string);
-    }
-    return text;
 }
 
 fn get_padding(string: String) -> String {
