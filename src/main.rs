@@ -6,6 +6,8 @@ use std::env;
 use std::io;
 mod colors;
 mod config;
+mod file;
+use file::read_file;
 
 /// A CLI to interact with QuickClip from the terminal
 #[derive(StructOpt, Debug)]
@@ -30,6 +32,10 @@ struct QuickClip {
     /// Content to push onto the clipboard when using the set mode
     #[structopt(name = "CONTENT")]
     content: Option<String>,
+
+    /// Filename
+    #[structopt(name = "FILENAME", short = "f", long = "file")]
+    filename: Option<String>,
 
     /// Content to push onto the clipboard when using the set mode
     #[structopt(name = "CLIPBOARD ID", short = "c", long = "id")]
@@ -67,7 +73,12 @@ async fn main() {
             if quickclip.append {
                 content = format!(
                     "{}\n{}",
-                    quickclip::fetch_content(&config.quickclip_url, &clipboard_id, &config.quicklip_username, &config.quicklip_password)
+                    quickclip::fetch_content(
+                        &config.quickclip_url,
+                        &clipboard_id,
+                        &config.quicklip_username,
+                        &config.quicklip_password
+                    )
                     .await,
                     content
                 )
@@ -102,6 +113,41 @@ async fn main() {
             &config.quicklip_username,
             &config.quicklip_password,
             !quickclip.output,
+        )
+        .await;
+    } else if quickclip.mode == "getfile" || quickclip.mode == "gf" {
+        let filename = quickclip.filename.unwrap_or_else(|| {
+            eprintln!(
+                "{}: A filename string is required when using getfile.",
+                colors::red("Error")
+            );
+            process::exit(1)
+        });
+        file::write_file(
+            quickclip::fetch_content(
+                &config.quickclip_url,
+                &clipboard_id,
+                &config.quicklip_username,
+                &config.quicklip_password,
+            )
+            .await,
+            filename,
+        )
+    } else if quickclip.mode == "setfile" || quickclip.mode == "sf" {
+        let filename = quickclip.filename.unwrap_or_else(|| {
+            eprintln!(
+                "{}: A filename string is required when using setfile.",
+                colors::red("Error")
+            );
+            process::exit(1)
+        });
+        let file_content = read_file(filename);
+        quickclip::put_content(
+            &config.quickclip_url,
+            &clipboard_id,
+            &config.quicklip_username,
+            &config.quicklip_password,
+            file_content,
         )
         .await;
     } else {
