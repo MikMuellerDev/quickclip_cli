@@ -66,14 +66,8 @@ async fn main() {
                 .to_string();
             if quickclip.append {
                 content = format!(
-                    "{}{}",
-                    quickclip::get_content(
-                        &config.quickclip_url,
-                        &clipboard_id,
-                        &config.quicklip_username,
-                        &config.quicklip_password,
-                        false,
-                    )
+                    "{}\n{}",
+                    quickclip::fetch_content(&config.quickclip_url, &clipboard_id, &config.quicklip_username, &config.quicklip_password)
                     .await,
                     content
                 )
