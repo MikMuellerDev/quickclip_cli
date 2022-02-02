@@ -23,6 +23,10 @@ struct QuickClip {
     #[structopt(short = "o", long = "output")]
     output: bool,
 
+    /// If used, quickclip CLI will append the content to the clip instead of replacing it.
+    #[structopt(short = "a", long = "append")]
+    append: bool,
+
     /// Content to push onto the clipboard when using the set mode
     #[structopt(name = "CONTENT")]
     content: Option<String>,
@@ -50,10 +54,30 @@ async fn main() {
     if quickclip.mode == "set" || quickclip.mode == "s" {
         let mut content: String;
         if !quickclip.input {
-            content = quickclip.content.unwrap_or_else(|| {
-                eprintln!("{}: A content string is required when using set.", colors::red("Error"));
-                process::exit(1)
-            }).to_string();
+            content = quickclip
+                .content
+                .unwrap_or_else(|| {
+                    eprintln!(
+                        "{}: A content string is required when using set.",
+                        colors::red("Error")
+                    );
+                    process::exit(1)
+                })
+                .to_string();
+            if quickclip.append {
+                content = format!(
+                    "{}{}",
+                    quickclip::get_content(
+                        &config.quickclip_url,
+                        &clipboard_id,
+                        &config.quicklip_username,
+                        &config.quicklip_password,
+                        false,
+                    )
+                    .await,
+                    content
+                )
+            }
         } else {
             content = "".to_string();
             loop {

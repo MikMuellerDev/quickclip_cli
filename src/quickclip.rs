@@ -48,6 +48,52 @@ pub async fn put_content(
     }
 }
 
+pub async fn fetch_content() {
+    url: &String,
+    id: &String,
+    username: &String,
+    password: &String,
+    pretty: bool,
+) {
+    let client = reqwest::Client::new();
+    let res = client
+        .get(format!(
+            "{}/api/clip/{}?username={}&password={}",
+            url, id, username, password
+        ))
+        .send()
+        .await
+        .ok()
+        .unwrap_or_else(|| {
+            eprintln!("{}: QuickClip is unreachable", colors::red("Error"));
+            process::exit(7);
+        });
+
+    let status_code = res.status();
+    if status_code == 200 {
+        let response_text: String = res.text().await.ok().unwrap_or_else(|| {
+            eprintln!("Server didn't send a text response.");
+            process::exit(4);
+        });
+        let clipboard: Clipboard = serde_json::from_str(response_text.as_str())
+            .ok()
+            .unwrap_or_else(|| {
+                eprintln!("{}: Parsing Server response failed, check your configuration.", colors::red("Error"));
+                process::exit(3)
+            });
+           return  clipboard.content
+        
+    } else {
+        println!(
+            "Getting clipboard {}. Response: {}",
+            colors::red("failed"),
+            status_code
+        );
+        return ""
+    }
+}
+
+
 pub async fn get_content(
     url: &String,
     id: &String,
