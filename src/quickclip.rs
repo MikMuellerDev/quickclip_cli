@@ -27,7 +27,11 @@ pub async fn put_content(
         .await
         .ok()
         .unwrap_or_else(|| {
-            eprintln!("{}: QuickClip is unreachable", colors::red("Error"));
+            eprintln!(
+                "{}: QuickClip is unreachable.{}",
+                colors::red("Error"),
+                " ".repeat(30)
+            );
             process::exit(7);
         });
 
@@ -35,15 +39,16 @@ pub async fn put_content(
     // println!("Status Code: {}", status_code);
     if status_code == 200 {
         println!(
-            "Contents of clipboard '{}' updated {}.",
+            "Contents of clipboard '{}' updated {}.     ",
             colors::blue(id),
             colors::green("successfully")
         )
     } else {
         println!(
-            "Setting content {}. Response: {}",
+            "Setting content {}. Response: {}.{}",
             colors::red("failed"),
-            status_code
+            status_code,
+            " ".repeat(30)
         )
     }
 }
@@ -64,13 +69,17 @@ pub async fn fetch_content(
         .await
         .ok()
         .unwrap_or_else(|| {
-            eprintln!("{}: QuickClip is unreachable", colors::red("Error"));
+            eprintln!(
+                "{}: QuickClip is unreachable.{}",
+                colors::red("Error"),
+                " ".repeat(30)
+            );
             process::exit(7);
         });
     let status_code = res.status();
     if status_code == 200 {
         let response_text: String = res.text().await.ok().unwrap_or_else(|| {
-            eprintln!("Server didn't send a text response.");
+            eprintln!("Server didn't send a text response.      ");
             return "".to_string();
         });
         let clipboard: Clipboard = serde_json::from_str(response_text.as_str())
@@ -94,9 +103,10 @@ pub async fn fetch_content(
         return clipboard.content;
     } else {
         println!(
-            "Getting clipboard {}. Response: {}",
+            "Getting clipboard {}. Response: {}.{}",
             colors::red("failed"),
-            status_code
+            status_code,
+            " ".repeat(30)
         );
         return "".to_string();
     }
@@ -119,14 +129,18 @@ pub async fn get_content(
         .await
         .ok()
         .unwrap_or_else(|| {
-            eprintln!("{}: QuickClip is unreachable", colors::red("Error"));
+            eprintln!(
+                "{}: QuickClip is unreachable.{}",
+                colors::red("Error"),
+                " ".repeat(30)
+            );
             process::exit(7);
         });
 
     let status_code = res.status();
     if status_code == 200 {
         let response_text: String = res.text().await.ok().unwrap_or_else(|| {
-            eprintln!("Server didn't send a text response.");
+            eprintln!("Server didn't send a text response.{}", " ".repeat(30));
             process::exit(4);
         });
 
@@ -146,9 +160,10 @@ pub async fn get_content(
         }
     } else {
         println!(
-            "Getting clipboard {}. Response: {}",
+            "Getting clipboard {}. Response: {}.{}",
             colors::red("failed"),
-            status_code
+            status_code,
+            " ".repeat(30)
         )
     }
 }

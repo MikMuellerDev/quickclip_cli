@@ -1,3 +1,4 @@
+use crate::colors;
 use base64;
 use deflate::deflate_bytes;
 use inflate::inflate_bytes;
@@ -16,7 +17,8 @@ pub fn read_file(name: String) -> String {
     let size_compressed: u32 = compressed.len() as u32 / 1024;
 
     println!(
-        "[Deflate] Source: {}KB compressed: {}KB. Size reduction: {}%",
+        "{}: Source: {}KB compressed: {}KB. Size reduction: {}%",
+        colors::blue("Deflate"),
         size_uncompressed,
         size_compressed,
         (100.0 - (size_compressed as f32 / size_uncompressed as f32) * 100.0).round()
@@ -37,7 +39,8 @@ pub fn write_file(string: String, filename: String) {
     let mut file = File::create(&filename).unwrap();
 
     println!(
-        "[Inflate] Source: {}KB Uncompressed: {}KB. Size increased: {}%",
+        "{}: Source: {}KB Uncompressed: {}KB. Size increased: {}%",
+        colors::blue("Inflate"),
         size_compressed,
         size_uncompressed,
         (100.0 - (size_compressed as f32 / size_uncompressed as f32) * 100.0).round()
@@ -48,6 +51,6 @@ pub fn write_file(string: String, filename: String) {
     println!(
         "Contents written to file to {}. Final size: {}MB",
         filename,
-        size_uncompressed / 1024,
+        size_uncompressed as f32 / 1024.0,
     );
 }
