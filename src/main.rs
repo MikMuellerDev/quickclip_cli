@@ -139,10 +139,14 @@ async fn main() {
             &config.quicklip_password,
         )
         .await;
+        spinner.abort();
+        let spinner = task::spawn(spinner::start_spinner(
+            "Inflating compressed contents and writing to file.",
+        ));
         file::write_file(content, filename);
         spinner.abort();
     } else if quickclip.mode == "setfile" || quickclip.mode == "sf" {
-        let spinner = task::spawn(spinner::start_spinner());
+        let spinner = task::spawn(spinner::start_spinner("Reading and compressing file."));
         let filename = quickclip.filename.unwrap_or_else(|| {
             eprintln!(
                 "{}: A filename string is required when using setfile.",
@@ -151,6 +155,10 @@ async fn main() {
             process::exit(1)
         });
         let file_content = read_file(filename);
+        spinner.abort();
+        let spinner = task::spawn(spinner::start_spinner(
+            "Uploading compressed contents to QuickClip.",
+        ));
         quickclip::put_content(
             &config.quickclip_url,
             &clipboard_id,
