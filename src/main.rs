@@ -1,12 +1,14 @@
 use crate::config::Config;
 use std::process;
 use structopt::StructOpt;
+use tokio::task;
 mod quickclip;
 use std::env;
 use std::io;
 mod colors;
 mod config;
 mod file;
+mod spinner;
 use file::read_file;
 
 /// A CLI to interact with QuickClip from the terminal
@@ -58,6 +60,7 @@ async fn main() {
         .unwrap_or(config.default_clipboard_id);
 
     if quickclip.mode == "set" || quickclip.mode == "s" {
+        let spinner = task::spawn(spinner::start_spinner("Uploading Content to QuickClip."));
         let mut content: String;
         if !quickclip.input {
             content = quickclip
@@ -81,7 +84,8 @@ async fn main() {
                     )
                     .await,
                     content
-                )
+                );
+                spinner.abort()
             }
         } else {
             content = "".to_string();
@@ -107,6 +111,7 @@ async fn main() {
         )
         .await;
     } else if quickclip.mode == "get" || quickclip.mode == "g" {
+        let spinner = task::spawn(spinner::start_spinner("Fetching Content from QuickClip."));
         quickclip::get_content(
             &config.quickclip_url,
             &clipboard_id,
@@ -115,7 +120,11 @@ async fn main() {
             !quickclip.output,
         )
         .await;
+        spinner.abort()
     } else if quickclip.mode == "getfile" || quickclip.mode == "gf" {
+        let spinner = task::spawn(spinner::start_spinner(
+            "Getting encoded file contents from QuickClip.",
+        ));
         let filename = quickclip.filename.unwrap_or_else(|| {
             eprintln!(
                 "{}: A filename string is required when using getfile.",
@@ -123,17 +132,17 @@ async fn main() {
             );
             process::exit(1)
         });
-        file::write_file(
-            quickclip::fetch_content(
-                &config.quickclip_url,
-                &clipboard_id,
-                &config.quicklip_username,
-                &config.quicklip_password,
-            )
-            .await,
-            filename,
+        let content = quickclip::fetch_content(
+            &config.quickclip_url,
+            &clipboard_id,
+            &config.quicklip_username,
+            &config.quicklip_password,
         )
+        .await;
+        file::write_file(content, filename);
+        spinner.abort();
     } else if quickclip.mode == "setfile" || quickclip.mode == "sf" {
+        let spinner = task::spawn(spinner::start_spinner());
         let filename = quickclip.filename.unwrap_or_else(|| {
             eprintln!(
                 "{}: A filename string is required when using setfile.",
@@ -150,6 +159,7 @@ async fn main() {
             file_content,
         )
         .await;
+        spinner.abort()
     } else {
         println!(
             "{}: Invalid Mode: {}",
