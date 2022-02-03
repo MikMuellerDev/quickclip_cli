@@ -34,7 +34,7 @@ pub fn write_file(string: String, filename: String) {
     let size_compressed: u32 = content.len() as u32 / 1024;
     let size_uncompressed: u32 = uncompressed.len() as u32 / 1024;
 
-    let mut file = File::create(filename).unwrap();
+    let mut file = File::create(&filename).unwrap();
 
     println!(
         "[Inflate] Source: {}KB Uncompressed: {}KB. Size increased: {}%",
@@ -45,4 +45,9 @@ pub fn write_file(string: String, filename: String) {
 
     // Write a slice of bytes to the file
     file.write_all(&uncompressed).unwrap();
+    println!(
+        "Contents written to file to {}. Final size: {}MB",
+        filename,
+        size_uncompressed / 1024,
+    );
 }

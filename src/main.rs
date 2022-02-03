@@ -140,11 +140,15 @@ async fn main() {
         )
         .await;
         spinner.abort();
+        println!(
+            "Fetched content from QuickClip. Content-length: {}",
+            content.len()
+        );
         let spinner = task::spawn(spinner::start_spinner(
             "Inflating compressed contents and writing to file.",
         ));
-        file::write_file(content, filename);
         spinner.abort();
+        file::write_file(content, filename);
     } else if quickclip.mode == "setfile" || quickclip.mode == "sf" {
         let spinner = task::spawn(spinner::start_spinner("Reading and compressing file."));
         let filename = quickclip.filename.unwrap_or_else(|| {

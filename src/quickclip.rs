@@ -67,7 +67,6 @@ pub async fn fetch_content(
             eprintln!("{}: QuickClip is unreachable", colors::red("Error"));
             process::exit(7);
         });
-
     let status_code = res.status();
     if status_code == 200 {
         let response_text: String = res.text().await.ok().unwrap_or_else(|| {
@@ -81,7 +80,16 @@ pub async fn fetch_content(
                     "{}: Parsing Server response failed, check your configuration.",
                     colors::red("Error")
                 );
-                Clipboard {content: "".to_string(), description: "".to_string(), id: "".to_string(), name: "".to_string(), read_only: false, refresh: false, refresh_interval: 0, restricted: false}
+                Clipboard {
+                    content: "".to_string(),
+                    description: "".to_string(),
+                    id: "".to_string(),
+                    name: "".to_string(),
+                    read_only: false,
+                    refresh: false,
+                    refresh_interval: 0,
+                    restricted: false,
+                }
             });
         return clipboard.content;
     } else {

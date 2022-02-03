@@ -8,7 +8,7 @@ pub async fn start_spinner(text: &str) {
     print!("\x1b[1F");
     loop {
         for pos in SPINNER_POSITIONS {
-            println!(" {} {}\x1b[1F", colors::blue(pos), text);
+            println!("{} {}\x1b[1F", text, colors::blue(pos));
             tokio::time::sleep(Duration::from_millis(70)).await;
         }
     }
