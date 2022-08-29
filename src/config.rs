@@ -36,5 +36,5 @@ pub fn read_config(filepath: &str) -> Config {
             eprintln!("Parsing config file failed, check your JSON syntax.");
             process::exit(3)
         });
-    return config;
+    config
 }

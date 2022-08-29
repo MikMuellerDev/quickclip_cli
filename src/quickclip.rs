@@ -80,7 +80,7 @@ pub async fn fetch_content(
     if status_code == 200 {
         let response_text: String = res.text().await.ok().unwrap_or_else(|| {
             eprintln!("Server didn't send a text response.      ");
-            return "".to_string();
+            String::new()
         });
         let clipboard: Clipboard = serde_json::from_str(response_text.as_str())
             .ok()
@@ -100,7 +100,7 @@ pub async fn fetch_content(
                     restricted: false,
                 }
             });
-        return clipboard.content;
+        clipboard.content
     } else {
         println!(
             "Getting clipboard {}. Response: {}.{}",
@@ -108,7 +108,7 @@ pub async fn fetch_content(
             status_code,
             " ".repeat(30)
         );
-        return "".to_string();
+        String::new()
     }
 }
 
@@ -221,5 +221,5 @@ fn get_padding(string: String) -> String {
     for _ in 0..41 - string.len() {
         output = format!(" {}", output);
     }
-    return output;
+    output
 }

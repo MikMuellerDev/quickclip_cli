@@ -1,15 +1,16 @@
 use crate::config::Config;
+use file::read_file;
+use std::env;
+use std::io;
 use std::process;
 use structopt::StructOpt;
 use tokio::task;
-mod quickclip;
-use std::env;
-use std::io;
+
 mod colors;
 mod config;
 mod file;
+mod quickclip;
 mod spinner;
-use file::read_file;
 
 /// A CLI to interact with QuickClip from the terminal
 #[derive(StructOpt, Debug)]
@@ -50,7 +51,7 @@ async fn main() {
         eprintln!("{}: retrieving home directory: {}", colors::red("Error"), e);
         process::exit(7)
     });
-    let config_file_path: String = format!("{}/.config/quickclip.json", home_directory);
+    let config_file_path = format!("{}/.config/quickclip.json", home_directory);
     let config: Config = config::read_config(config_file_path.as_str());
 
     let quickclip = QuickClip::from_args();
@@ -71,8 +72,7 @@ async fn main() {
                         colors::red("Error")
                     );
                     process::exit(1)
-                })
-                .to_string();
+                });
             if quickclip.append {
                 content = format!(
                     "{}\n{}",
@@ -95,9 +95,11 @@ async fn main() {
                     .read_line(&mut input)
                     .expect("Failed to read from pipe");
                 input = input.to_string();
-                if input == "" {
+
+                if input.is_empty() {
                     break;
                 }
+
                 content = format!("{}{}", content, input);
             }
         }

@@ -1,5 +1,4 @@
 use crate::colors;
-use base64;
 use deflate::deflate_bytes;
 use inflate::inflate_bytes;
 use std::{
@@ -24,8 +23,7 @@ pub fn read_file(name: String) -> String {
         (100.0 - (size_compressed as f32 / size_uncompressed as f32) * 100.0).round()
     );
 
-    let content = base64::encode(compressed);
-    return content;
+    base64::encode(compressed)
 }
 
 pub fn write_file(string: String, filename: String) {
