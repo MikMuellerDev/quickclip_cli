@@ -21,7 +21,7 @@ pub struct Clipboard {
     pub description: String,
     pub restricted: bool,
     pub refresh: bool,
-    pub refresh_interval: isize,
+    pub refresh_interval: i32,
     pub read_only: bool,
 }
 

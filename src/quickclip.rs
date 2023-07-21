@@ -145,9 +145,9 @@ pub async fn get_content(
         });
 
         let clipboard: Clipboard =
-            serde_json::from_str(response_text.as_str()).unwrap_or_else(|e| {
+            serde_json::from_str(response_text.as_str()).unwrap_or_else(|err| {
                 eprintln!(
-                    "{}: Parsing Server response failed, check your configuration. Error: {e}",
+                    "{}: Parsing Server response failed, check your configuration: {err}",
                     colors::red("Error")
                 );
                 process::exit(3)
