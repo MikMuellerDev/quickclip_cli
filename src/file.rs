@@ -3,11 +3,11 @@ use deflate::deflate_bytes;
 use inflate::inflate_bytes;
 use std::{
     fs::File,
-    io::{Read, Write},
+    io::{Read, Write}, process,
 };
 
 pub fn read_file(name: String) -> String {
-    let mut file = File::open(&name).unwrap();
+    let mut file = File::open(name).unwrap();
     let mut buf: Vec<u8> = vec![];
     file.read_to_end(&mut buf).unwrap();
 
@@ -15,7 +15,7 @@ pub fn read_file(name: String) -> String {
     let size_uncompressed: u32 = buf.len() as u32 / 1024;
     let size_compressed: u32 = compressed.len() as u32 / 1024;
 
-    println!(
+    eprintln!(
         "{}: Source: {}KB compressed: {}KB. Size reduction: {}%",
         colors::blue("Deflate"),
         size_uncompressed,
@@ -27,7 +27,10 @@ pub fn read_file(name: String) -> String {
 }
 
 pub fn write_file(string: String, filename: String) {
-    let content = base64::decode(string).unwrap();
+    let content = base64::decode(string).unwrap_or_else(|e| {
+        eprintln!("Could not decode base 64, Error: {e}");
+        process::exit(1);
+    });
 
     let uncompressed = inflate_bytes(&content).unwrap();
 
@@ -36,7 +39,7 @@ pub fn write_file(string: String, filename: String) {
 
     let mut file = File::create(&filename).unwrap();
 
-    println!(
+    eprintln!(
         "{}: Source: {}KB Uncompressed: {}KB. Size increased: {}%",
         colors::blue("Inflate"),
         size_compressed,
@@ -46,7 +49,7 @@ pub fn write_file(string: String, filename: String) {
 
     // Write a slice of bytes to the file
     file.write_all(&uncompressed).unwrap();
-    println!(
+    eprintln!(
         "Contents written to file to {}. Final size: {}MB",
         filename,
         size_uncompressed as f32 / 1024.0,

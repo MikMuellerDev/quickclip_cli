@@ -64,15 +64,13 @@ async fn main() {
         let spinner = task::spawn(spinner::start_spinner("Uploading Content to QuickClip."));
         let mut content: String;
         if !quickclip.input {
-            content = quickclip
-                .content
-                .unwrap_or_else(|| {
-                    eprintln!(
-                        "{}: A content string is required when using set.",
-                        colors::red("Error")
-                    );
-                    process::exit(1)
-                });
+            content = quickclip.content.unwrap_or_else(|| {
+                eprintln!(
+                    "{}: A content string is required when using set.",
+                    colors::red("Error")
+                );
+                process::exit(1)
+            });
             if quickclip.append {
                 content = format!(
                     "{}\n{}",
@@ -94,7 +92,6 @@ async fn main() {
                 io::stdin()
                     .read_line(&mut input)
                     .expect("Failed to read from pipe");
-                input = input.to_string();
 
                 if input.is_empty() {
                     break;
@@ -103,7 +100,6 @@ async fn main() {
                 content = format!("{}{}", content, input);
             }
         }
-        // println!("Content: {}", content);
         quickclip::put_content(
             &config.quickclip_url,
             &clipboard_id,
@@ -142,7 +138,7 @@ async fn main() {
         )
         .await;
         spinner.abort();
-        println!(
+        eprintln!(
             "Fetched content from QuickClip. Content-length: {}",
             content.len()
         );
@@ -175,7 +171,7 @@ async fn main() {
         .await;
         spinner.abort()
     } else {
-        println!(
+        eprintln!(
             "{}: Invalid Mode: {}",
             colors::red("Error"),
             colors::blue(quickclip.mode.as_str())

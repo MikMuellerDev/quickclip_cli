@@ -36,15 +36,14 @@ pub async fn put_content(
         });
 
     let status_code = res.status();
-    // println!("Status Code: {}", status_code);
     if status_code == 200 {
-        println!(
+        eprintln!(
             "Contents of clipboard '{}' updated {}.     ",
             colors::blue(id),
             colors::green("successfully")
         )
     } else {
-        println!(
+        eprintln!(
             "Setting content {}. Response: {}.{}",
             colors::red("failed"),
             status_code,
@@ -86,8 +85,9 @@ pub async fn fetch_content(
             .ok()
             .unwrap_or_else(|| {
                 eprintln!(
-                    "{}: Parsing Server response failed, check your configuration.",
-                    colors::red("Error")
+                    "{}: Parsing Server response failed, check your configuration. Response: {}",
+                    colors::red("Error"),
+                    response_text
                 );
                 Clipboard {
                     content: "".to_string(),
@@ -102,7 +102,7 @@ pub async fn fetch_content(
             });
         clipboard.content
     } else {
-        println!(
+        eprintln!(
             "Getting clipboard {}. Response: {}.{}",
             colors::red("failed"),
             status_code,
@@ -144,11 +144,10 @@ pub async fn get_content(
             process::exit(4);
         });
 
-        let clipboard: Clipboard = serde_json::from_str(response_text.as_str())
-            .ok()
-            .unwrap_or_else(|| {
+        let clipboard: Clipboard =
+            serde_json::from_str(response_text.as_str()).unwrap_or_else(|e| {
                 eprintln!(
-                    "{}: Parsing Server response failed, check your configuration.",
+                    "{}: Parsing Server response failed, check your configuration. Error: {e}",
                     colors::red("Error")
                 );
                 process::exit(3)
@@ -159,7 +158,7 @@ pub async fn get_content(
             println!("{}", clipboard.content)
         }
     } else {
-        println!(
+        eprintln!(
             "Getting clipboard {}. Response: {}.{}",
             colors::red("failed"),
             status_code,
